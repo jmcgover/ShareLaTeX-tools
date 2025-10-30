@@ -1,0 +1,58 @@
+line-length=120
+fix=false
+exclude = [
+  "venv",
+  ".venv",
+]
+
+[lint]
+select = [
+  "ASYNC", # flake8-async
+  "COM", # flake8-commas
+  "D", # pydocstyle
+  "DTZ", # flake8-datetimez (prevents using tz-naive datetime)
+  "E", # Pylint Error
+  "F", # Pyflakes
+  "FURB", # refurb (refurbish/modernize Python codebase)
+  "ISC", # flake8-implicit-str-concat
+  "Q", # flake8-quotes
+  "RUF", # Ruff-specific rules
+  "UP", # pyupgrade (upgrade syntax for newer versions of python)
+  "W", # pycodestyle warnings
+  "TID", # pycodestyle warnings
+]
+ignore=[
+  "COM812", # missing-trailing-comma: Conflicts with formatter
+  "COM819", # prohibited-trailing-comma: Conflicts with lint rules
+  "D203", # incorrect-blank-line-before-class: Conflicts with something
+  "D206", # docstring-tab-indentation: Conflicting lint rules
+  "D212", # multi-line-summary-first-line: Conflicts with something
+  "D213", # multi-line-summary-second-line: Conflicts with something
+  "D400", # missing-trailing-period: Dupicates D415 for periods
+  "E501", # line-too-long: Conflicting lint rules
+  "ISC001", # single-line-implicit-string-concatenation: Conflicts with formatter
+  "Q000", # bad-quotes-inline-string: Conflicting lint rules
+  "Q001", # bad-quotes-multiline-string: Conflicting lint rules
+  "Q002", # bad-quotes-docstring: Conflicting lint rules
+  "Q003", # avoidable-escaped-quote: Conflicting lint rules
+  "RUF012", # mutable-class-default: Incorrect for Pydantic classes
+  "W191", # tab-indentation: Conflicting lint rules
+]
+
+# https://docs.astral.sh/ruff/faq/#how-does-ruffs-import-sorting-compare-to-isort
+[lint.isort]
+known-first-party = ["sharelatex", "test"]
+case-sensitive = true
+section-order = [
+  "future",
+  "standard-library",
+  "third-party",
+  "first-party",
+  "local-folder",
+]
+force-sort-within-sections = true
+force-wrap-aliases = true
+combine-as-imports = true
+
+[lint.per-file-ignores]
+"tests/*.py" = ["INP001", "S101", "D"]
