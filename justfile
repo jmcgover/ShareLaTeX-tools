@@ -64,7 +64,7 @@ clean: format lint
 format-justfile:
     just --fmt --unstable
 
-# run with 'ls'
+# run help
 run-help:
     poetry run python -m sharelatex --help
 
@@ -72,15 +72,15 @@ run-help:
 run-ls:
     poetry run python -m sharelatex ls
 
-# run with 'list-projects'
+# obtain just project metadata, output josn
 run-list:
     poetry run python -m sharelatex list-projects --json
 
-# run with 'list-projects', obtaining all metadata
+# obtain ALL metadata
 run-list-full:
     poetry run python -m sharelatex list-projects --full
 
-# run with 'list-project-ids'
+# list all project IDs in a way that's bash-iterable
 run-list-ids:
     poetry run python -m sharelatex list-project-ids
 
@@ -108,11 +108,11 @@ run-clone:
     done
     echo "=====COMPLETE====="
 
-# run with 'extract-project-metadata'
+# extract individual project metadata into respective folder
 run-extract-project-metadata:
     poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
 
-# clone the projects locally
+# extract individual project metadata into respective folder and commit
 run-commit-per-project-meta:
     #! /usr/bin/env bash
     set -o errexit
@@ -141,7 +141,7 @@ run-commit-per-project-meta:
     done
     echo "=====COMPLETE====="
 
-# clone the projects locally
+# git status on each of the project directories
 run-git-status:
     #! /usr/bin/env bash
     set -o errexit
