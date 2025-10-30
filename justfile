@@ -1,15 +1,16 @@
 # just: a handy way to save and run project-specific commands.
-# 
+#
 # dotenv-load: load a .env file, if present
 # positional-arguments: pass recipe arguments as positional arguments to commands
 #
-# To use dmypy for the types recipt, add this to your .bashrc:
+# To use dmypy for the types recipe, add this to your .bashrc:
 #   export MYPY_CMD='dmypy run --'
+
 set dotenv-load := true
 set positional-arguments := true
 
 [private]
-_mypycmd := env("MYPY_CMD","mypy")
+_mypycmd := env("MYPY_CMD", "mypy")
 
 # list all recipes
 default:
@@ -99,3 +100,7 @@ run-clone:
         echo ${GIT_TOKEN} | git clone --progress --verbose https://git@git.overleaf.com/${id} "${WORK_DIR}/${id}"
     done
     echo "=====COMPLETE====="
+
+# run with 'extract-project-metadata'
+run-extract-project-metadata:
+    poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"

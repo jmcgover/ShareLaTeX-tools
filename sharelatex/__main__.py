@@ -1,6 +1,9 @@
 """Executed when invoked directly on the CLI with the -m flag."""
 
+import difflib
 import json
+import pathlib
+import sys
 
 import click
 import pyoverleaf
@@ -13,10 +16,56 @@ def main() -> None:
 
 
 def get_projects() -> list[pyoverleaf.Project]:
-    """Sign into Overleaf and return the projects."""
+    """Sign into Overleaf via pyoverleaf and return account projects."""
     api = pyoverleaf.Api()
     api.login_from_browser()
     return api.get_projects()
+
+
+@main.command("extract-project-metadata")
+@click.argument(
+    "work_dir",
+    type=click.Path(
+        exists=True,
+        dir_okay=True,
+        file_okay=False,
+        writable=True,
+        readable=True,
+        executable=False,
+        resolve_path=True,  # resolve symlinks (not ~)
+        path_type=pathlib.Path,
+    ),
+)
+def extract_project_metadata(work_dir: pathlib.Path) -> None:
+    """Extract project metadata to specific project folders."""
+    projects: list[pyoverleaf.Project]
+    # Read Prefetched Projects
+    prefetched_projects: pathlib.Path = work_dir.joinpath("projects.json")
+    with prefetched_projects.open("r") as json_file:
+        _projects = json.load(json_file)
+        if not isinstance(_projects, list):
+            raise ValueError(f"Expected {prefetched_projects=!s} to be a list, but found {type(_projects)}")
+        projects = [pyoverleaf.Project.from_dict(p) for p in _projects]
+
+    # Ensure that IDs are accounted for on both sides
+    dirs = [i for i in work_dir.iterdir() if i.is_dir()]
+    ids_expected: list[str] = sorted([p.id for p in projects])
+    ids_dirnames: list[str] = sorted([d.name for d in dirs])
+    if ids_dirnames != ids_expected:
+        # Unified diffs can pipe into something like Delta for pretty output.
+        # No, I don't know why I need to do all this.
+        sys.stdout.writelines(
+            difflib.unified_diff(
+                fromfile=str(prefetched_projects),
+                a=("\n".join(ids_expected) + "\n").splitlines(keepends=True),
+                tofile=str(work_dir),
+                b=("\n".join(ids_dirnames) + "\n").splitlines(keepends=True),
+                lineterm="\n",
+                n=3,
+            )
+        )
+        raise ValueError("Mismatched project IDs and directories with project files.")
+    return
 
 
 @main.command("list-project-ids")
