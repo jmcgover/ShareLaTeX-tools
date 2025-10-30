@@ -90,6 +90,12 @@ def extract_project_metadata(work_dir: pathlib.Path) -> None:
             )
         )
         raise ValueError("Mismatched project IDs and directories with project files.")
+    # Save metadata into each project's folder
+    projects_by_id: dict[str, ProjectMeta] = {p.project.id: p for p in projects}
+    for id_dir in ids_dirnames:
+        project_meta: pathlib.Path = work_dir.joinpath(id_dir, "project.json")
+        with project_meta.open(mode="w") as json_file:
+            print(json.dumps(projects_by_id[id_dir].to_dict(), indent=2, sort_keys=True), file=json_file)
     return
 
 

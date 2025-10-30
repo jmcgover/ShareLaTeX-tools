@@ -96,9 +96,11 @@ run-clone:
     fi
 
     set -o xtrace
+    # Time: 1min for 153 projects
     poetry run python -m sharelatex list-projects --json --full> "${WORK_DIR}/projects.json"
     set +o xtrace
-    # Took about 13min for 153 projects totaling 800MiB 
+
+    # Time: 13min for 153 projects totaling 800MiB
     echo "=====START====="
     for id in $(poetry run python -m sharelatex list-project-ids); do
         echo "=====${id}"
@@ -111,7 +113,7 @@ run-extract-project-metadata:
     poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
 
 # clone the projects locally
-run-list-full-save:
+run-commit-per-project-meta:
     #! /usr/bin/env bash
     set -o errexit
     set -o nounset
@@ -122,6 +124,41 @@ run-list-full-save:
     fi
 
     set -o xtrace
-    # Took about 1min for 153 projects totaling 800MiB
-    poetry run python -m sharelatex list-projects --full> "${WORK_DIR}/projects.json"
+    # Time: 1sec for 153 projects
+    poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
     set +o xtrace
+
+    echo "=====START====="
+    for id_dir in $(ls -d "${WORK_DIR}"/*/); do
+        echo "=====${id_dir}"
+        set -o xtrace
+        cd "${id_dir}"
+        git status
+        git add project.json
+        git commit -m "add project meta for project ID $(basename ${id_dir})"
+        cd -
+        set +o xtrace
+    done
+    echo "=====COMPLETE====="
+
+# clone the projects locally
+run-git-status:
+    #! /usr/bin/env bash
+    set -o errexit
+    set -o nounset
+
+    if [[ ! -d ${WORK_DIR} ]]; then
+        echo "WORK_DIR='${WORK_DIR}' must be a directory"
+        exit 22
+    fi
+
+    echo "=====START====="
+    for id_dir in $(ls -d "${WORK_DIR}"/*/); do
+        echo "=====${id_dir}"
+        set -o xtrace
+        cd "${id_dir}"
+        git status
+        cd -
+        set +o xtrace
+    done
+    echo "=====COMPLETE====="
