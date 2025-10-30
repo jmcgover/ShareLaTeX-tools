@@ -1,8 +1,15 @@
+# just: a handy way to save and run project-specific commands.
+# 
+# dotenv-load: load a .env file, if present
+# positional-arguments: pass recipe arguments as positional arguments to commands
+#
+# To use dmypy for the types recipt, add this to your .bashrc:
+#   export MYPY_CMD='dmypy run --'
 set dotenv-load := true
 set positional-arguments := true
 
 [private]
-_mypycmd := env("MYPY_CMD","mypy") # MYPY_CMD='dmypy run --'
+_mypycmd := env("MYPY_CMD","mypy")
 
 # list all recipes
 default:
