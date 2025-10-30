@@ -76,6 +76,10 @@ run-ls:
 run-list:
     poetry run python -m sharelatex list-projects --json
 
+# run with 'list-projects', obtaining all metadata
+run-list-full:
+    poetry run python -m sharelatex list-projects --full
+
 # run with 'list-project-ids'
 run-list-ids:
     poetry run python -m sharelatex list-project-ids
@@ -92,8 +96,9 @@ run-clone:
     fi
 
     set -o xtrace
-    poetry run python -m sharelatex list-projects --json > "${WORK_DIR}/projects.json"
+    poetry run python -m sharelatex list-projects --json --full> "${WORK_DIR}/projects.json"
     set +o xtrace
+    # Took about 13min for 153 projects totaling 800MiB 
     echo "=====START====="
     for id in $(poetry run python -m sharelatex list-project-ids); do
         echo "=====${id}"
@@ -104,3 +109,19 @@ run-clone:
 # run with 'extract-project-metadata'
 run-extract-project-metadata:
     poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
+
+# clone the projects locally
+run-list-full-save:
+    #! /usr/bin/env bash
+    set -o errexit
+    set -o nounset
+
+    if [[ ! -d ${WORK_DIR} ]]; then
+        echo "WORK_DIR='${WORK_DIR}' must be a directory"
+        exit 22
+    fi
+
+    set -o xtrace
+    # Took about 1min for 153 projects totaling 800MiB
+    poetry run python -m sharelatex list-projects --full> "${WORK_DIR}/projects.json"
+    set +o xtrace

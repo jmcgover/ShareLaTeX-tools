@@ -1,12 +1,37 @@
 """Executed when invoked directly on the CLI with the -m flag."""
 
+from dataclasses import dataclass
 import difflib
 import json
 import pathlib
 import sys
+from typing import Self
 
 import click
+from dataclasses_json import DataClassJsonMixin
 import pyoverleaf
+
+
+@dataclass
+class ProjectMeta(DataClassJsonMixin):
+    """Node for capturing full project (including dir/file) metadata."""
+
+    project: pyoverleaf.Project
+    root: pyoverleaf.ProjectFolder
+
+    @classmethod
+    def from_project(
+        cls,
+        api: pyoverleaf.Api,
+        project: pyoverleaf.Project,
+    ) -> Self:
+        """Use a logged in API to obtain the all dir/file metadata."""
+        return cls(
+            project=project,
+            root=api.project_get_files(
+                project_id=project.id,
+            ),
+        )
 
 
 @click.group()
@@ -38,18 +63,18 @@ def get_projects() -> list[pyoverleaf.Project]:
 )
 def extract_project_metadata(work_dir: pathlib.Path) -> None:
     """Extract project metadata to specific project folders."""
-    projects: list[pyoverleaf.Project]
+    projects: list[ProjectMeta]
     # Read Prefetched Projects
     prefetched_projects: pathlib.Path = work_dir.joinpath("projects.json")
     with prefetched_projects.open("r") as json_file:
         _projects = json.load(json_file)
         if not isinstance(_projects, list):
             raise ValueError(f"Expected {prefetched_projects=!s} to be a list, but found {type(_projects)}")
-        projects = [pyoverleaf.Project.from_dict(p) for p in _projects]
+        projects = [ProjectMeta.from_dict(p) for p in _projects]
 
     # Ensure that IDs are accounted for on both sides
     dirs = [i for i in work_dir.iterdir() if i.is_dir()]
-    ids_expected: list[str] = sorted([p.id for p in projects])
+    ids_expected: list[str] = sorted([p.project.id for p in projects])
     ids_dirnames: list[str] = sorted([d.name for d in dirs])
     if ids_dirnames != ids_expected:
         # Unified diffs can pipe into something like Delta for pretty output.
@@ -78,13 +103,25 @@ def list_project_ids() -> None:
 
 @main.command("list-projects")
 @click.option("--json", "to_json", is_flag=True, help="JSON output")
-def list_projects(to_json: bool) -> None:
+@click.option("--full", "full", is_flag=True, help="include all dir/file metadata")
+def list_projects(to_json: bool, full: bool) -> None:
     """List projects and their details."""
-    projects: list[pyoverleaf.Project] = get_projects()
-    if to_json:
-        print(json.dumps([p.to_dict() for p in projects], indent=2, sort_keys=True))
+    # Obtain each Project from logged in account
+    api = pyoverleaf.Api()
+    api.login_from_browser()
+    projects: list[pyoverleaf.Project] = api.get_projects()
+    if not full:
+        if to_json:
+            print(json.dumps([p.to_dict() for p in projects], indent=2, sort_keys=True))
+            return
+        print("\n".join(f"{project.id} {project.name}" for project in projects))
         return
-    print("\n".join(f"{project.id} {project.name}" for project in projects))
+
+    # Obtain all the metadata for each Project
+    project_metas: list[ProjectMeta] = [ProjectMeta.from_project(api=api, project=p) for p in projects]
+
+    # Output (always to JSON for full output)
+    print(json.dumps([p.to_dict() for p in project_metas], indent=2, sort_keys=True))
     return
 
 
