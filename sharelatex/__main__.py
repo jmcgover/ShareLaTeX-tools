@@ -19,15 +19,15 @@ def get_projects() -> list[pyoverleaf.Project]:
     return api.get_projects()
 
 
-@main.command("list-project-ids", help="List projects IDs only.")
+@main.command("list-project-ids")
 def list_project_ids() -> None:
-    """List projects and their details."""
+    """List projects IDs only."""
     projects: list[pyoverleaf.Project] = get_projects()
     print(" ".join(f"{project.id}" for project in projects))
     return
 
 
-@main.command("list-projects", help="List projects and their details.")
+@main.command("list-projects")
 @click.option("--json", "to_json", is_flag=True, help="JSON output")
 def list_projects(to_json: bool) -> None:
     """List projects and their details."""
@@ -39,10 +39,10 @@ def list_projects(to_json: bool) -> None:
     return
 
 
-@main.command("ls", help="List projects or files in a project")
+@main.command("ls")
 @click.argument("path", type=str, default=".")
 def list_projects_and_files(path: str) -> None:
-    """List projects (and its files) with ls-like semantics."""
+    """List projects (or its files) with ls-like semantics."""
     api = pyoverleaf.Api()
     api.login_from_browser()
     projects: list[pyoverleaf.Project] = api.get_projects()

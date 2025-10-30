@@ -57,6 +57,10 @@ format-justfile:
     just --fmt --unstable
 
 # run with 'ls'
+run-help:
+    poetry run python -m sharelatex --help
+
+# run with 'ls'
 run-ls:
     poetry run python -m sharelatex ls
 
