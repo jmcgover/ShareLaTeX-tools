@@ -84,6 +84,10 @@ run-list-full:
 run-list-ids:
     poetry run python -m sharelatex list-project-ids
 
+# extract individual project metadata into respective folder
+run-extract-project-metadata:
+    poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
+
 # clone the projects locally
 run-clone:
     #! /usr/bin/env bash
@@ -107,10 +111,6 @@ run-clone:
         echo ${GIT_TOKEN} | git clone --progress --verbose https://git@git.overleaf.com/${id} "${WORK_DIR}/${id}"
     done
     echo "=====COMPLETE====="
-
-# extract individual project metadata into respective folder
-run-extract-project-metadata:
-    poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
 
 # extract individual project metadata into respective folder and commit
 run-commit-per-project-meta:
