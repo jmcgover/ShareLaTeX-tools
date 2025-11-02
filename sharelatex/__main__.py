@@ -47,6 +47,64 @@ def get_projects() -> list[pyoverleaf.Project]:
     return api.get_projects()
 
 
+@main.command("rename-project-folders")
+@click.argument(
+    "work_dir",
+    type=click.Path(
+        exists=True,
+        dir_okay=True,
+        file_okay=False,
+        writable=True,
+        readable=True,
+        executable=False,
+        resolve_path=True,  # resolve symlinks (not ~)
+        path_type=pathlib.Path,
+    ),
+)
+def rename_project_folders(work_dir: pathlib.Path) -> None:
+    """Rename project folders to project name in metadata file."""
+    projects: list[ProjectMeta]
+    # Read Prefetched Projects
+    prefetched_projects: pathlib.Path = work_dir.joinpath("projects.json")
+    with prefetched_projects.open("r") as json_file:
+        _projects = json.load(json_file)
+        if not isinstance(_projects, list):
+            raise ValueError(f"Expected {prefetched_projects=!s} to be a list, but found {type(_projects)}")
+        projects = [ProjectMeta.from_dict(p) for p in _projects]
+
+    # Ensure that IDs are accounted for on both sides
+    dirs = [i for i in work_dir.iterdir() if i.is_dir() and not i.name.startswith(".")]
+    ids_expected: list[str] = sorted([p.project.id for p in projects])
+    ids_dirnames: list[str] = sorted([d.name for d in dirs])
+    if ids_dirnames != ids_expected:
+        # Unified diffs can pipe into something like Delta for pretty output.
+        # No, I don't know why I need to do all this.
+        sys.stdout.writelines(
+            difflib.unified_diff(
+                fromfile=str(prefetched_projects),
+                a=("\n".join(ids_expected) + "\n").splitlines(keepends=True),
+                tofile=str(work_dir),
+                b=("\n".join(ids_dirnames) + "\n").splitlines(keepends=True),
+                lineterm="\n",
+                n=3,
+            )
+        )
+        raise ValueError("Mismatched project IDs and directories with project files.")
+    # Rename each folder from the project ID to the project name
+    projects_by_id: dict[str, ProjectMeta] = {p.project.id: p for p in projects}
+    for id_dir in ids_dirnames:
+        old: pathlib.Path = work_dir.joinpath(id_dir)
+        new: pathlib.Path = work_dir.joinpath(projects_by_id[id_dir].project.name)
+        # Increment if existing file
+        i: int = 0
+        while new.exists():
+            i += 1
+            new = work_dir.joinpath(f"{projects_by_id[id_dir].project.name} ({i})")
+        print(f"{old!s}->{new!s}")
+        old.rename(new)
+    return
+
+
 @main.command("extract-project-metadata")
 @click.argument(
     "work_dir",
