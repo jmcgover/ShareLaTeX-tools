@@ -3,7 +3,7 @@
 - [install poetry ](https://python-poetry.org/docs/#installation)
 - `poetry install` from repo root
 - Set the following in a `.env` file:
-    - `WORK_DIR`: Path to an empty directory
+    - `SAVE_DIR`: Path to an empty directory
     - `GIT_TOKEN`: Overleaf-provided git authorization token
 - `just run-ls`
 - `just run-list-projects`

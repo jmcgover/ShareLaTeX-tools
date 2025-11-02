@@ -86,7 +86,7 @@ run-list-ids:
 
 # extract individual project metadata into respective folder
 run-extract-project-metadata:
-    poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
+    poetry run python -m sharelatex extract-project-metadata "${SAVE_DIR}"
 
 # clone the projects locally
 run-clone:
@@ -94,21 +94,21 @@ run-clone:
     set -o errexit
     set -o nounset
 
-    if [[ ! -d ${WORK_DIR} ]]; then
-        echo "WORK_DIR='${WORK_DIR}' must be a directory"
+    if [[ ! -d ${SAVE_DIR} ]]; then
+        echo "SAVE_DIR='${SAVE_DIR}' must be a directory"
         exit 22
     fi
 
     set -o xtrace
     # Time: 1min for 153 projects
-    poetry run python -m sharelatex list-projects --json --full> "${WORK_DIR}/projects.json"
+    poetry run python -m sharelatex list-projects --json --full> "${SAVE_DIR}/projects.json"
     set +o xtrace
 
     # Time: 13min for 153 projects totaling 800MiB
     echo "=====START====="
     for id in $(poetry run python -m sharelatex list-project-ids); do
         echo "=====${id}"
-        echo ${GIT_TOKEN} | git clone --progress --verbose https://git@git.overleaf.com/${id} "${WORK_DIR}/${id}"
+        echo ${GIT_TOKEN} | git clone --progress --verbose https://git@git.overleaf.com/${id} "${SAVE_DIR}/${id}"
     done
     echo "=====COMPLETE====="
 
@@ -118,18 +118,18 @@ run-commit-per-project-meta:
     set -o errexit
     set -o nounset
 
-    if [[ ! -d ${WORK_DIR} ]]; then
-        echo "WORK_DIR='${WORK_DIR}' must be a directory"
+    if [[ ! -d ${SAVE_DIR} ]]; then
+        echo "SAVE_DIR='${SAVE_DIR}' must be a directory"
         exit 22
     fi
 
     set -o xtrace
     # Time: 1sec for 153 projects
-    poetry run python -m sharelatex extract-project-metadata "${WORK_DIR}"
+    poetry run python -m sharelatex extract-project-metadata "${SAVE_DIR}"
     set +o xtrace
 
     echo "=====START====="
-    for id_dir in $(ls -d "${WORK_DIR}"/*/); do
+    for id_dir in $(ls -d "${SAVE_DIR}"/*/); do
         echo "=====${id_dir}"
         set -o xtrace
         cd "${id_dir}"
@@ -147,13 +147,13 @@ run-git-status:
     set -o errexit
     set -o nounset
 
-    if [[ ! -d ${WORK_DIR} ]]; then
-        echo "WORK_DIR='${WORK_DIR}' must be a directory"
+    if [[ ! -d ${SAVE_DIR} ]]; then
+        echo "SAVE_DIR='${SAVE_DIR}' must be a directory"
         exit 22
     fi
 
     echo "=====START====="
-    for id_dir in $(ls -d "${WORK_DIR}"/*/); do
+    for id_dir in $(ls -d "${SAVE_DIR}"/*/); do
         echo "=====${id_dir}"
         set -o xtrace
         cd "${id_dir}"
