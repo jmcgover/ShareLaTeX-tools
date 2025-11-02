@@ -38,6 +38,12 @@
     - [jkulhanek/pyoverleaf | Issues #9 | Tags don't have color attribute](https://github.com/jkulhanek/pyoverleaf/issues/9)
     - JSON serialization
     - Make type annotations work (you literally just need to a `py.typed` file
+- [Stack Overflow | Merge two Git repositories without breaking file history](https://stackoverflow.com/questions/13040958/merge-two-git-repositories-without-breaking-file-history)
+- GitHub made some weird decisions about when the thing happened, when what I really wanted was to retain as much accurate original history as I could. This seemed to work:
+  - [Using git-filter-repo to set commit dates to author dates](https://til.simonwillison.net/git/git-filter-repo)
+  - `git filter-repo --commit-callback 'commit.committer_date = commit.author_date'`
+    - `git-filter-repo` wants you to use a freshly cloned repo
+    - `git-filter-repo` will remove the origin from your repo after making changes
 
 ## Poetry
 
