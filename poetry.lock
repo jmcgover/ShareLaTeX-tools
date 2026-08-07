@@ -1097,10 +1097,7 @@ ast-serialize = ">=0.6.0,<1.0.0"
 librt = {version = ">=0.13.0", markers = "platform_python_implementation != \"PyPy\""}
 mypy_extensions = ">=1.0.0"
 pathspec = ">=1.0.0"
-typing_extensions = [
-    {version = ">=4.6.0", markers = "python_version < \"3.15\""},
-    {version = ">=4.14.0", markers = "python_version >= \"3.15\""},
-]
+typing_extensions = {version = ">=4.6.0", markers = "python_version < \"3.15\""}
 
 [package.extras]
 dmypy = ["psutil (>=4.0)"]
@@ -1433,6 +1430,25 @@ python-lsp-server = ">=1.13.1"
 
 [package.extras]
 test = ["coverage", "pytest", "pytest-cov", "tox"]
+
+[[package]]
+name = "pylsp-workspace-symbols"
+version = "0.7.0"
+description = "Workspace symbols, inlay hints, code lens, semantic tokens, call/type hierarchy, document links, colors and on-type formatting for python-lsp-server via Jedi"
+optional = false
+python-versions = ">=3.8"
+groups = ["dev"]
+files = [
+    {file = "pylsp_workspace_symbols-0.7.0-py3-none-any.whl", hash = "sha256:4fcf6ba3bc1404cee6a447e5a193e8cc9eb893822be473ca1c2eb9bdd2099f21"},
+    {file = "pylsp_workspace_symbols-0.7.0.tar.gz", hash = "sha256:46119be525f21c93a712922fb46b9086f280b396156b44cc2c3fe06ec323c732"},
+]
+
+[package.dependencies]
+jedi = ">=0.18"
+python-lsp-server = ">=1.7"
+
+[package.extras]
+dev = ["pytest (>=7)", "pytest-cov", "python-lsp-server[all]"]
 
 [[package]]
 name = "pyoverleaf"
@@ -2017,5 +2033,5 @@ type = ["pytest-mypy"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.11,<4.0"
-content-hash = "5b2c6d9beb5128c15a63be0aa61156a1e3b0463b8b5e83500054ae737745c41c"
+python-versions = ">=3.11,<=3.14"
+content-hash = "1b0df1b9408806738fab680909d280dca31c583ae5314d1f7eb39c5f36214548"
